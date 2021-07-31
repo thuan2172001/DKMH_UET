@@ -18,6 +18,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import java.io.File;  // Import the File class
+import java.io.FileWriter;   // Import the FileWriter class
+import java.io.IOException;
 
 /**
  * Tool for automatically registering courses of VNU.
@@ -58,6 +61,7 @@ public class AutoDKMH {
     private String user;
     private String password;
     private List<String> courseCodes;
+    private List<String> optionsClasses;
 
     private List<Course> courses;
 
@@ -66,6 +70,7 @@ public class AutoDKMH {
 
     public AutoDKMH() {
         courseCodes = new ArrayList<>();
+        optionsClasses = new ArrayList<>();
         courses = new ArrayList<>();
         loadInitialParameters("config.properties");
     }
@@ -120,6 +125,11 @@ public class AutoDKMH {
             logn("Filtered courses: " + courseCodes);
 
             if (courseCodes.isEmpty()) {
+                sendPost(AVAILABLE_COURSES_DATA_URL_MAJOR, "");
+                // print html to test
+                // log("Get raw courses data...");
+                // String coursesData = sendPost(AVAILABLE_COURSES_DATA_URL_ALL, "");
+                // String courseDetails[] = getCourseDetailsFromCoursesData(coursesData, "");
                 logn("\nCourses have been already registered!\n[Exit]");
                 System.exit(1);
             }
@@ -132,10 +142,16 @@ public class AutoDKMH {
             String coursesData = sendPost(AVAILABLE_COURSES_DATA_URL_ALL, "");
             logn("[Done]");
 
-            for (Iterator<String> it = courseCodes.iterator(); it.hasNext();) {
+            int i = 0;
+            for (Iterator<String> it = courseCodes.iterator(); it.hasNext(); i++) {
+                System.out.println("optionCode: " + optionsClasses.get(i));
+
                 String courseCode = it.next();
+                String optionCode = optionsClasses.get(i);
+
                 log("\nGetting course information for [" + courseCode + "]...");
-                String courseDetails[] = getCourseDetailsFromCoursesData(coursesData, courseCode);
+
+                String courseDetails[] = getCourseDetailsFromCoursesData(coursesData, courseCode, optionCode);
                 logn("[Done]");
 
                 /* register courses and submit them */
@@ -214,8 +230,13 @@ public class AutoDKMH {
             this.password = p.getProperty("passwd");
 
             String rawCourseCodes = p.getProperty("course_codes");
+            String rawOptionsClasses = p.getProperty("options_classes");
+
             String[] courseCodesArr = rawCourseCodes.split("\\.");
+            String[] optionsClassArr = rawOptionsClasses.split("\\.");
+
             courseCodes.addAll(Arrays.asList(courseCodesArr));
+            optionsClasses.addAll(Arrays.asList(optionsClassArr));
 
             String sleepTimeStr = p.getProperty("sleep_time");
             this.sleepTime = Long.parseLong(sleepTimeStr);
@@ -234,10 +255,29 @@ public class AutoDKMH {
      * @return the first element is data-crdid and the second is data-rowindex
      *         if the course is available. Otherwise, return null
      */
-    private String[] getCourseDetailsFromCoursesData(String coursesDataHtml, String courseCode) {
+    private String[] getCourseDetailsFromCoursesData(String coursesDataHtml, String courseCode, String optionCode) {
         coursesDataHtml = "<table id=\"coursesData\">" + coursesDataHtml + "</table>";
         Document doc = Jsoup.parse(coursesDataHtml);
         Elements elements = doc.select("#coursesData").select("tr");
+
+        if (optionCode == null) optionCode = "0";
+        // logn(doc.toString());
+
+        // write html to a file to test
+        // try {
+        //     File myObj = new File("filename.txt");
+        //     if (myObj.createNewFile()) {
+        //       logn("File created: " + myObj.getName());
+        //     } else {
+        //       logn("File already exists.");
+        //     }
+        //     FileWriter myWriter = new FileWriter("filename.txt");
+        //     myWriter.write(doc.toString());
+        //     myWriter.close();
+        //   } catch (IOException e) {
+        //     logn("An error occurred.");
+        //     e.printStackTrace();
+        // }
 
         /* find course on courses list which owns the given course code */
         for (Element e : elements) {
@@ -247,6 +287,25 @@ public class AutoDKMH {
                  * tag if the course is available
                  */
                 Element inputElement = e.getElementsByTag("input").get(0);
+
+                // options get(x) de chon lop thuc hanh so x (1->n)
+                List<Element> inputElements = e.getElementsByTag("input");
+                
+                logn(inputElements.toString());
+
+                if (inputElements.size() >= 3 && optionCode != "0") {
+                    switch (optionCode) {
+                        case "1":
+                            inputElement = inputElements.get(1);
+                            break;
+                        case "2":
+                            inputElement = inputElements.get(2);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                // options get(x) de chon lop thuc hanh so x (1->n)
 
                 if (inputElement.hasAttr("data-rowindex")) { // the course is
                                                              // available for

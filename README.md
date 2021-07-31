@@ -1,11 +1,5 @@
 # AutoDKMH
 *Command-line tool for automatically registering courses of VNU*
-
-## Advantages
-- Totally automatic tool
-- Won't stop until successful registering or being killed by you
-- Command-line based, you can run from a server which has strong network connection
-
 ## Setup
 Config account and course codes in ```src/config.properties```
   - ```usr``` - Student code
@@ -16,4 +10,6 @@ Config account and course codes in ```src/config.properties```
 ## Run
 Run with maven plugin
 
-```mvn install exec:java```
+First install and run application: ```mvn install exec:java```
+Compile new code and run applicaiotn: ```mvn compile exec:java```
+Only run: ```mvn exec:java```
