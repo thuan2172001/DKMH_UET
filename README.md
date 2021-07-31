@@ -1,11 +1,12 @@
 # AutoDKMH
 *Command-line tool for automatically registering courses of VNU*
 ## Setup
-Config account and course codes in ```src/config.properties```
+Config account and course codes in ```src/config.properties``` follow template of ```src/config.properties.example```
   - ```usr``` - Student code
   - ```passwd``` - Password
   - ```course_codes``` - List of course codes, separated by dot characters (```.```)
-  - ```sleep_time``` - Sleep time between two adjacent executings
+  - ```course_codes``` - List of course codes, separated by dot characters (```.```)
+  - ```options_classes``` - Be careful with this field. Use when a class have both theory and practice classes, 1 is first practice class, 2 is the second class. List of course codes, separated by dot characters (```.```)
   
 ## Run
 Run with maven plugin

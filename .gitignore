@@ -2,3 +2,12 @@ target/
 .settings/
 .project
 .classpath
+
+
+## src
+src/config.properties
+
+#IntelliJ related
+.idea/
+
+filename.html
