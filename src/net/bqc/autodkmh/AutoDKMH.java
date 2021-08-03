@@ -22,11 +22,14 @@ import java.io.File;  // Import the File class
 import java.io.FileWriter;   // Import the FileWriter class
 import java.io.IOException;
 
+import java.io.FileReader;
+
 /**
  * Tool for automatically registering courses of VNU.
  *     public final static String HOST = "http://dangkyhoc.vnu.edu.vn";
  * @Created by cuong on  2/12/2015
  * @Updated by cuong on 17/08/2017
+ * @Updated by thuan on 3/08/2021
  */
 public class AutoDKMH {
 
@@ -144,12 +147,10 @@ public class AutoDKMH {
 
             int i = 0;
             for (Iterator<String> it = courseCodes.iterator(); it.hasNext(); i++) {
-                System.out.println("optionCode: " + optionsClasses.get(i));
-
                 String courseCode = it.next();
                 String optionCode = optionsClasses.get(i);
 
-                log("\nGetting course information for [" + courseCode + "]...");
+                logn("\n=> Getting course information for [" + courseCode + "] with option [" + optionCode +"]...");
 
                 String courseDetails[] = getCourseDetailsFromCoursesData(coursesData, courseCode, optionCode);
                 logn("[Done]");
@@ -256,11 +257,44 @@ public class AutoDKMH {
      *         if the course is available. Otherwise, return null
      */
     private String[] getCourseDetailsFromCoursesData(String coursesDataHtml, String courseCode, String optionCode) {
+        // StringBuilder contentBuilder = new StringBuilder();
+        // try {
+        //     BufferedReader in = new BufferedReader(new FileReader("test.html"));
+        //     String str;
+        //     while ((str = in.readLine()) != null) {
+        //         contentBuilder.append(str);
+        //     }
+        //     in.close();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        // String content = contentBuilder.toString();
+        // coursesDataHtml = "<table id=\"coursesData\">" + content + "</table>";
         coursesDataHtml = "<table id=\"coursesData\">" + coursesDataHtml + "</table>";
+        
         Document doc = Jsoup.parse(coursesDataHtml);
+        
         Elements elements = doc.select("#coursesData").select("tr");
 
         if (optionCode == null) optionCode = "0";
+
+        int optionIndex = 0;
+        int index = 0;
+
+        switch(optionCode) {
+            case "1":
+                optionIndex = 1;
+                break;
+            case "2":
+                optionIndex = 2;
+                break;
+            case "3":
+                optionIndex = 3;
+                break;
+            default:
+                optionIndex = 0;
+        }
+
         // logn(doc.toString());
 
         // write html to a file to test
@@ -282,36 +316,23 @@ public class AutoDKMH {
         /* find course on courses list which owns the given course code */
         for (Element e : elements) {
             if (e.toString().contains(courseCode)) {
+                if (index != optionIndex) {
+                    index = index + 1;
+                    continue;
+                }
                 /*
                  * data-cridid and data-rowindex always are at the first input
                  * tag if the course is available
                  */
+
                 Element inputElement = e.getElementsByTag("input").get(0);
-
-                // options get(x) de chon lop thuc hanh so x (1->n)
-                List<Element> inputElements = e.getElementsByTag("input");
-                
-                logn(inputElements.toString());
-
-                if (inputElements.size() >= 3 && optionCode != "0") {
-                    switch (optionCode) {
-                        case "1":
-                            inputElement = inputElements.get(1);
-                            break;
-                        case "2":
-                            inputElement = inputElements.get(2);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                // options get(x) de chon lop thuc hanh so x (1->n)
 
                 if (inputElement.hasAttr("data-rowindex")) { // the course is
                                                              // available for
                                                              // registering
                     String crdid = inputElement.attr("data-crdid");
                     String rowindex = inputElement.attr("data-rowindex");
+                    logn("Choose row: " + rowindex);
                     return new String[] { crdid, rowindex };
                 }
             }

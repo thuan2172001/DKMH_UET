@@ -10,4 +10,4 @@ src/config.properties
 #IntelliJ related
 .idea/
 
-filename.html
+*.html
