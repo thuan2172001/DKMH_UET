@@ -121,11 +121,38 @@ public class AutoDKMH {
             // it is necessary to do it before submitting courses
             log("Filtering desired courses...");
             String registeredCoursesData = sendPost(REGISTERED_COURSES_DATA_URL, "");
-            courseCodes = courseCodes.stream()
-                    .filter(code -> !registeredCoursesData.contains(code))
-                    .collect(Collectors.toList());
+
+            // copy paste ra file html de xem mon dang ky r
+            // logn("Mon hoc da dang ky roi: ");
+            // logn("- " + registeredCoursesData);
+            // List<String> indexCode = courseCodes.stream()
+            //         .map(code -> {
+            //             if (!registeredCoursesData.contains(code)) {
+            //                 return "1";
+            //             } else {
+            //                 return "-1";
+            //             }
+            //         })
+            //         .collect(Collectors.toList());
+                
+            // logn(indexCode.toString());
+
+            // courseCodes = courseCodes.stream()
+            //         .filter(code -> !registeredCoursesData.contains(code))
+            //         .collect(Collectors.toList());
+
+            // int j = 0;
+            // optionsClasses = optionsClasses.stream()
+            //     .filter((code) -> {
+            //         logn(indexCode.get(j));
+            //         j++;
+            //         return false;
+            //     })
+            //     .collect(Collectors.toList());
+
             logn("[Done]");
             logn("Filtered courses: " + courseCodes);
+            logn("Filtered courses: " + optionsClasses);
 
             if (courseCodes.isEmpty()) {
                 sendPost(AVAILABLE_COURSES_DATA_URL_MAJOR, "");
@@ -150,6 +177,7 @@ public class AutoDKMH {
                 String courseCode = it.next();
                 String optionCode = optionsClasses.get(i);
 
+                // logn(courseCode);
                 logn("\n=> Getting course information for [" + courseCode + "] with option [" + optionCode +"]...");
 
                 String courseDetails[] = getCourseDetailsFromCoursesData(coursesData, courseCode, optionCode);
