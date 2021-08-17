@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import java.io.File;  // Import the File class
 import java.io.FileWriter;   // Import the FileWriter class
 import java.io.IOException;
+import java.io.FileNotFoundException;  // Import this class to handle errors
+import java.util.Scanner; 
 
 import java.io.FileReader;
 
@@ -169,7 +171,31 @@ public class AutoDKMH {
 
             // get list of courses and the course details by given course code
             log("Get raw courses data...");
-            String coursesData = sendPost(AVAILABLE_COURSES_DATA_URL_ALL, "");
+            String coursesData = "";
+            // String coursesData = sendPost(AVAILABLE_COURSES_DATA_URL_ALL, "");
+
+            try {
+                File myObj = new File("test.html");
+                if (myObj.createNewFile()) {
+                    logn("File created: " + myObj.getName());
+                    coursesData = sendPost(AVAILABLE_COURSES_DATA_URL_ALL, "");
+                    FileWriter myWriter = new FileWriter("test.html");
+                    myWriter.write(coursesData.toString());
+                    myWriter.close();
+                } else {
+                    logn("File already exists.");
+                    Scanner myReader = new Scanner(myObj);
+                    while (myReader.hasNextLine()) {
+                        coursesData = myReader.nextLine();
+                    }
+                    logn(coursesData);
+                    myReader.close();
+                }
+            } catch (IOException e) {
+                logn("An error occurred.");
+                e.printStackTrace();
+            }
+
             logn("[Done]");
 
             int i = 0;
